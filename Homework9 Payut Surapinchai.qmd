@@ -1,0 +1,585 @@
+---
+title: "Homework 9"
+author: "Payut Surapinchai"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+warning: false
+---
+
+# Homework 9: Due Wednesday, April 9 at 11:59 PM
+
+------------------------------------------------------------------------
+
+## Instructions:
+
+------------------------------------------------------------------------
+
+1.  [Be sure to download and save the file so you are working with your own private copy of the file (rather than the shared version posted in Posit Cloud for example).]{style="color:red"}
+
+2.  [After you have copied the Quarto file into your Posit Cloud workspace or onto your computer, you can begin editing and saving your work.]{style="color:green"}
+
+**Submit your work electronically as two separate files:**
+
+-   **A Quarto markdown file with file extension `.qmd` with all code cells run and relevant output displayed in the document**.
+-   **After you have completed all questions, render your completed work to an html file.**
+-   **Submit the html file that is created with file extension `.html`**.
+
+Upload both files into the Homework 9 assignment in Canvas before **11:59PM on Wednesday, April 9.**
+
+**You must provide supporting work for your all of your answers.**
+
+-   [That work will include using R code cells.]{style="color:blue"}
+    -   **Feel free to insert as much R code as you like.**
+    -   When asked, you must interpret or explain how the output of a code cell is being utilized to solve the question.
+    -   **Code with incomplete or missing explanations of why the output is useful may not receive full credit.**
+    -   **Code that involves methods and commands we have not discussed this semester may not receive full credit.**
+-   [Your work may also involve writing explanations and justifications in text cells.]{style="color:blue"}
+    -   **Be sure to type/write out the steps of your work/explanation so I can see how you arrived at your answer.**
+
+## Important Academic Policies:
+
+------------------------------------------------------------------------
+
+-   **Be your own work.** Though you may collaborate with others, everyone is responsible for writing up the work in their own way using their own methods. Plagiarism of any form is not tolerated.
+-   **Be complete.** You must provide all work and/or explanations needed to find the solution. Answers with insufficient or incomplete supporting work may lose credit.
+-   **Adhere to the Code of Academic Honesty.**
+-   **Be clearly written (and legible if written).** Your solution to a question must be clear, written in complete sentences. You may lose credit for work that is unclear or hard to follow.
+
+## [Let me know if you need help, and **GOOD LUCK!!!**]{style="color:blue"}
+
+------------------------------------------------------------------------
+
+# Introduction to Assignment
+
+------------------------------------------------------------------------
+
+In this assignment, you will be merging a California county shapefile^1^ with data from the 2023 American Community Survey^2^ and performing an exploratory analysis. I will be providing general guidance, but not tell you exactly how to complete the task. [This will be more similar to real data analysis!]{style="color:blue"}
+
+The California county shapefile data is available in the zip file `ca-county.zip` available for download in our course GitHub repository. You can run the following commands to import the desired files.
+
+-   If you working in Posit Cloud, the files have already been added to the `data` folder.
+    -   You do not need to run any of the commands in the code cell below.
+    -   You may need to copy a more recent version of the Math 3376 Project to make sure you have the most up to date data.
+    -   See <https://posit.cloud/content/9926677> for most up to date version of the shared Math 3376 Project.
+-   If you are running R and RStudio locally on your computer, you will need download the data to work on this homework.
+    -   The `download.file` command downloads the `ca_counties.zip` file from GitHub into your current working directory.
+    -   The `unzip` command will unzip the `ca_counties` zip file and extract the files to a subfolder in your current working directory named `data/ca_counties`.
+    -   You can set your own file path(s) with the `destfile` and `exdir` arguments.
+    -   You only need to run the commands one time to download the required files.
+
+I recommend downloading all associated files into a subfolder named `data/ca_counties` in your current working directory before starting analysis. This has already been done in the Math 3376 Project in Posit Cloud.
+
+```{r}
+#| echo: false
+#| eval: false
+######################################################
+# if you are running RStudio locally on your computer
+# you will need to download and unzip the folder 
+# below to access the shape file
+######################################################
+#download.file("https://github.com/CU-Denver-MathStats-OER/Data-Wrangling-and-Visualization/raw/main/Data/ca_counties.zip", destfile = "./ca_counties.zip", method = "auto")
+#unzip("ca_counties.zip", exdir = "./data/ca_counties")
+```
+
+The 2023 ACS data for California is also available for download in the same GitHub repo in the file named `california_acs2023.csv`.
+
+-   **Whether you are running R and RStudio locally or using Posit Cloud, you do not need to download the `.csv` file.**
+-   You can simply import the `.csv` directly from a GitHub link that will be provided in the code in Question 3.
+-   If you want a local copy of the `.csv` file, there is a copy of the file in the `data` subfolder in the materials posted in the [Math 3376 Project](https://posit.cloud/content/9926677) in Posit Cloud.
+-   Optional: If you are running R and RStudio and would like to download the file onto your computer, you can use the code cell below to help.
+
+```{r}
+#| echo: false
+#| eval: false
+######################################################
+# optional: run if you would like to download a local 
+# copy of the csv file onto your computer.
+######################################################
+# you do not need a local copy of the csv file so you
+# may choose to skip this step.
+######################################################
+#download.file("https://github.com/CU-Denver-MathStats-OER/Data-Wrangling-and-Visualization/raw/main/Data/california_acs2023.csv", destfile = "./data/california_acs2023.csv", method = "auto")
+```
+
+## About the Data
+
+------------------------------------------------------------------------
+
+The file `california_acs2023.csv` includes variables with:
+
+-   `NAME`: the name of the county
+-   `population`: the estimated total population residing in the county
+-   `total_hispanic`: the estimated total number of Hispanic/Latino persons in the county
+-   `total_bs`: the estimated total number of persons in the county aged 25 or older with a Bachelor's degree
+-   `median_income`: the estimated median income for residents of the county
+-   `pcnt_pop`: the estimated percentage of the total state population that the county represents
+-   `pcnt_hispanic`: the estimated percentage of the county population that identified as Hispanic or Latino
+-   `pct_bs`: the estimated percentage of the county population aged 25 or order with a Bachelor's degree
+
+### Source of Data
+
+------------------------------------------------------------------------
+
+1.  California county shapefile downloaded from the California Open Data Portal, <https://data.ca.gov/dataset/ca-geographic-boundaries> on March 23, 2025.
+
+2.  California 2023 American Community Survey is from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/data/data-via-api.html) and imported using the [`tidycensus`](https://walker-data.com/tidycensus/index.html) package on March 23, 2025.
+
+# Loading Required Packages
+
+------------------------------------------------------------------------
+
+Make sure to load the `tidyverse` and `sf` packages before your analysis.
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(sf)
+```
+
+# Question 1
+
+------------------------------------------------------------------------
+
+Use the two separate code cells to perform the following two actions:
+
+-   Import the relevant shapefile data for the California counties. Assign the imported object the name `cali_shp`.
+    -   You may need to look in the `data/ca_counties` folder to identify the name of the shapefile.
+-   In the second code cell, run the command `str(cali_shp)` to display summary output to the screen.
+
+The imported object should be an `sf` object with 58 observations of 19 variables (fields) plus a geometry list column.
+
+## Solution to Question 1
+
+------------------------------------------------------------------------
+
+```{r}
+# enter command to import shapefile
+
+# Due to some errors, I had to manually download the file, and I put the files in the 
+# project foldier in cloud, so my directory is just the file name.
+
+# Use st_read to read a .shp file and store it in cali_shp.
+cali_shp <- st_read("CA_Counties.shp")
+```
+
+```{r}
+# run code cell to check output
+str(cali_shp)
+```
+
+# Question 2
+
+------------------------------------------------------------------------
+
+Select the `NAME` variable of `cali_shp` while retaining the geometry information of each object. Assign the new, subsetted object back to the name `cali_shp`. Then run a second command to display the first 3 rows of the updated object to the screen.
+
+-   The first 3 rows correspond to Sierra, Sacramento, and Santa Barbara counties.
+
+```{r}
+# create sf object called cali_shp as described above
+# print first 3 rows of cali_shp to screen
+
+# Use select() to select 2 columns: the name and the geometry columns and store it in 
+# cali_shp.
+cali_shp <- cali_shp |> select(NAME, geometry)
+
+# Print the first 3 rows of the new cali_shp using head()
+head(cali_shp, 3)
+```
+
+# Question 3
+
+------------------------------------------------------------------------
+
+Run the code cell below to import the `california_acs2017.csv` into R. Assign the object the name `cali_df`.
+
+-   There is nothing to edit in the code cell. Simply run it.
+-   If you prefer to use a downloaded version of the `.csv` file rather than the link to the GitHub file, feel free to edit the code cell below accordingly.
+-   The resulting data frame should have 58 rows and 8 variables.
+    -   One variable is stored as a `character`, and seven variables are stored as `double`.
+
+```{r}
+# run code to import data frame
+# no need to edit this code cell
+cali_df <- read_csv("https://raw.githubusercontent.com/CU-Denver-MathStats-OER/Data-Wrangling-and-Visualization/main/Data/california_acs2023.csv")
+```
+
+# Question 4
+
+------------------------------------------------------------------------
+
+Use the code cell below to run command(s) to compare the `NAME` column of `cali_shp` with the `NAME` column of `cali_df`.
+
+Based on the output from your code, explain any difference(s) you notice and what issue(s) will this cause when trying to merge the data from the two objects. Use complete sentences when typing your answer.
+
+```{r}
+# use code cell to identify differences
+
+# I just wanted to use different methods for both because cali_shp is a df, and 
+# cali_df is a tibble, so I wanted to use different methods, but technically the same
+# methods would work.
+
+# Use [] to slice the data frame, so that I only have the "NAME" column and store it in # shp_name.
+shp_name <- cali_shp[,"NAME"]
+
+# Use select() to select the "NAME" column and store it in df_name.
+df_name <- cali_df |> select(NAME)
+
+# Print the first 3 rows of both shp_name and df_name by using head().
+head(shp_name, 3)
+head(df_name, 3)
+```
+
+## Solution to Question 4
+
+------------------------------------------------------------------------
+
+1\. The cali_df's NAME column has ", California" after the county's name.
+
+This point will cause a problem when I try to merge these two data frames because in order to merge/join, the observations in one of the column of a data frame has to be the same to the observations of the one of the column of the other data frame you want to merge into. But in this case, the NAME column is very different from each other due to the cali_df having ", California" in each observations which would make it hard to merge to cali_shp's NAME column which doesn't have ", California".
+
+The other difference is the cali_shp's NAME column is not in an alphabetical order whereas cali_df's NAME column is in an alphabetical order, but this shouldn't pose a problem in merging/joining the columns.
+
+# Question 5
+
+------------------------------------------------------------------------
+
+Run the commands in the code cell below to change the `NAME` column of `cali_df` and view the impact of this change. Based on the output, in the solution space below the code cell, explain what the command does and why it is useful to do this. Use complete sentences when typing your answer below.
+
+```{r}
+cali_df <- cali_df |>
+  mutate(NAME = str_sub(NAME, start = 1L, end = -20L))
+head(cali_df$NAME)
+```
+
+## Solution to Question 5
+
+------------------------------------------------------------------------
+
+The command seems to change observations in the cali_df's NAME column by removing the ", California" part by doing the str_sub (I assume is string subset) to subset the only part we need which is the county. Which removes the main issue that I've figured would be a problem if I were to merge the two data frames (cali_shp and cali_df).
+
+# Question 6
+
+------------------------------------------------------------------------
+
+Merge or join the observations in the `cali_shp` and `cali_df` data frames by county name and name the new object `cali_sf`. Print the first 3 rows of the new object.
+
+-   The `sf` object you created should have 58 features, 8 fields, and one geometry column.
+-   The first three rows correspond to Sierra, Sacramento, and Santa Barbara counties.
+
+```{r}
+# merge observations to sf object called cali_sf
+# then print first three rows of cali_sf
+
+# Use full_join() to join the two data frames by the "NAME" column and store it in 
+# cali_sf.
+cali_sf <- full_join(cali_df, cali_shp, by = "NAME")
+
+# Print the first 3 rows of cali_sf using head().
+head(cali_sf, 3)
+```
+
+# Question 7
+
+------------------------------------------------------------------------
+
+Determine the California counties with the 5 largest population values. Print the county name and population of these counties to the screen.
+
+```{r}
+# display indicated info on screen
+
+# Use slice_max to find the top 5 largest population values in the cali_sf data frame
+# and then select only the NAME and population columns.
+slice_max(cali_sf, population, n = 5) |> select(NAME, population)
+```
+
+# Question 8
+
+------------------------------------------------------------------------
+
+Use the `plot()` function to plot the borders of the California counties while filling the 5 largest population counties with the color grey.
+
+-   All other counties will not be shaded at all.
+-   You must Use the `plot()` function and may not use `ggplot2` for this question.
+
+```{r}
+# use plot to create the indicated visualization
+
+# Create a new variable pop_max that has the top 5 largest population values, the names # of the counties, and the geometry of the counties that has top 5 largest population values.
+pop_max <- slice_max(cali_sf, population, n = 5)
+
+# Use st_sf(cali_sf) to convert cali_sf to a special features class object.
+cali_sf <- st_sf(cali_sf)
+
+# Plot an empty California map using st_geometry(cali_sf) which takes only the geometry # column of the cali_sf data frame and plot it as a map.
+plot(st_geometry(cali_sf))
+
+# Plot the top 5 largest population values and fill it with grey.
+# Use st_sf(pop_max) to make sure st_geometry works with pop_max.
+# add = TRUE makes it so that, this plot overlays the plot above.
+plot(st_geometry(st_sf(pop_max)), col = "grey",add = TRUE)
+```
+
+# Question 9
+
+------------------------------------------------------------------------
+
+What do you notice about the spatial pattern of the largest population counties? Type your answer in the space below using a complete sentence.
+
+## Solution to Question 9
+
+------------------------------------------------------------------------
+
+The largest population counties seems to all be bundled up in the bottom right section of California, and that they are also counties that are neighboring each other (all the counties are close to each other).
+
+# Question 10
+
+------------------------------------------------------------------------
+
+Use the `ggplot2` package to plot the borders of the California counties while filling the 5 largest population counties a different color from the rest of the counties. **Include a descriptive main title for the plot.**
+
+-   You must use `ggplot2` to generate the map and may not use `plot`.
+
+```{r}
+# use ggplot2 to create the indicated visualization
+
+# Same pop_max as the code above. For some reason my code was bugging when I don't have
+# pop_max in the same code block as the code I want to use pop_max.
+pop_max <- slice_max(cali_sf, population, n = 5)
+
+# Use ggplot() to create a blank canvas for plotting.
+ggplot() + 
+  
+  # geom_sf(data = cali_sf) for plotting the empty California map.
+  geom_sf(data = cali_sf) +
+  
+  # add another geom_sf(data = pop_max, fill = "lightblue") to overlay and fill the 
+  # counties that have 5 largest populations value with lightblue color.
+  geom_sf(data = pop_max, fill = "lightblue") + 
+  
+  # theme_bw() just makes the background black and white.
+  theme_bw() +
+  
+  # add a title and a subtitle using labs() to describe the plot.
+  labs(title = "5 California counties with most population",
+       subtitle = "(areas that are highlighted in light blue)")
+
+```
+
+# Question 11
+
+------------------------------------------------------------------------
+
+Determine the California counties with the 5 largest median incomes. Print the county name and median income of these counties.
+
+```{r}
+# display indicated info on screen
+
+# Use slice_max to find the 5 largest median incomes, and select only the NAME, and the 
+# median_income column.
+# I use as_tibble(cali_sf) to make sure cali_sf is a tibble so that slice_max works 
+# more smoothly.
+slice_max(as_tibble(cali_sf), median_income, n = 5) |> select(NAME, median_income)
+```
+
+# Question 12
+
+------------------------------------------------------------------------
+
+Plot the borders of the California counties while filling the counties with the 5 largest median incomes one color and the remaining counties in a different color. **Include a descriptive main title for the plot.**
+
+```{r}
+# create the indicated visualization
+
+# I will omit the detailed explanations of ggplot() because I've explained it before.
+
+# Store the 5 largest median income from the previous code block (without the select()) 
+# to median_max
+median_max <- slice_max(cali_sf, median_income, n = 5) 
+
+# Use ggplot() to plot the empty graph.
+ggplot() +
+  
+  # Use geom_sf() to plot an empty California map where its filled with black and has 
+  # border colors as yellow.
+  geom_sf(data = cali_sf, fill = "black", color = "yellow") +
+  
+  # Use geom_sf() again to add and overlay the median_max values, and use the color red
+  # to highlight the counties with 5 largest median incomes.
+  geom_sf(data = median_max, fill = "red") + 
+  
+  # theme_bw() for a white and black background.
+  theme_bw() +
+  
+  # add a title and subtitle using labs().
+  labs(title = "5 California counties with most median income",
+       subtitle = "(areas that are highlighted in red)")
+```
+
+# Question 13
+
+------------------------------------------------------------------------
+
+What do you notice about the spatial pattern of the counties with the largest median incomes? Type your answer in the space below using a complete sentence.
+
+## Solution to Question 13
+
+------------------------------------------------------------------------
+
+The counties are all grouped together at around left-middle of California and they are also neighboring counties (the counties are close to each other).
+
+# Question 14
+
+------------------------------------------------------------------------
+
+Determine the California counties with the 5 largest number of Hispanic/Latino residents. Print the county name and Hispanic/Latino population of these counties.
+
+```{r}
+# display indicated info on screen
+
+# Use slice_max() to find the 5 largest number of Hispanic/Latino residents, and select
+# only the NAME and the total_hispanic columns.
+slice_max(as_tibble(cali_sf), total_hispanic, n = 5) |> select(NAME, total_hispanic)
+```
+
+# Question 15
+
+------------------------------------------------------------------------
+
+Determine the California counties with the 5 highest percentages of Hispanic/Latino residents. Print the county name and percentage of Hispanic/Latino residents of these counties.
+
+```{r}
+# display indicated info on screen
+
+# Use slice_max() to find the 5 largest percentage of Hispanic/Latino resident
+# and select only the NAME and the pcnt_hispanic columns.
+slice_max(as_tibble(cali_sf), pcnt_hispanic, n = 5) |> select(NAME, pcnt_hispanic)
+```
+
+# Question 16
+
+------------------------------------------------------------------------
+
+Why do you think there is a difference between the counties with the 5 highest total number of Hispanic/Latino residents and the counties with the highest percentages? Type your answer in the space below using complete sentences.
+
+## Solution to Question 16
+
+------------------------------------------------------------------------
+
+Because the percentage is the proportion of hispanic people in relation to all the people in that county which depends on how many people is in that county in proportion to the hispanic people. For example, Los Angeles is in the top 5 of most population in all of the California counties, and also has the most hispanic people in the county of all the counties. However, Los Angeles was not even in the top 5 of most hispanic percentage in the county. This is because there are so many non-hispanic people in Los Angeles, that the percentage of hispanic people is low, even though Los Angeles has the most hispanic people out of all counties.
+
+# Question 17
+
+------------------------------------------------------------------------
+
+Plot the borders of the California counties, filling the counties with the 5 largest **percentages** of Hispanic/Latino residents one color and the remaining counties in a different color. **Include a descriptive main title for the plot**.
+
+```{r}
+# create the indicated visualization
+
+# Store the 5 largest percentage of hispanic/latino people in pcnt_hispanic_max
+pcnt_hispanic_max <- slice_max(cali_sf, pcnt_hispanic, n = 5)
+
+# Use ggpplot() to plot the map.
+ggplot() +
+  
+  # Use geom_sf() to plot the empty map, and fill it with yellow.
+  geom_sf(data = cali_sf, fill = "yellow") +
+  
+  # Use geom_sf() to plot the 5 largest percentage of hispanic/latino people and fill
+  # it with cyan.
+  geom_sf(data = pcnt_hispanic_max, fill = "cyan") +
+  
+  # Add a title and a subtitle using labs().
+  labs(title = "5 California counties with highest % of hispanic people",
+       subtitle = "(areas that are highlighted in cyan)")
+```
+
+# Question 18
+
+------------------------------------------------------------------------
+
+Do you notice any spatial patterns for the counties with the 5 highest percentages of residents identifying as Hispanic/Latino? Type your answer in the space below using complete sentences.
+
+## Solution to Question 18
+
+------------------------------------------------------------------------
+
+The counties with 5 highest percentages of Hispanic residents are all scattered and not grouped at one place like the spatial patterns for most population, or most median income. However, there are 3 counties that seems to be around in the middle near each other.
+
+# Question 19
+
+------------------------------------------------------------------------
+
+Determine the California counties with the 5 highest percentages of residents aged 25 years or older with Bachelor's degrees. Print the county name and the percentage of residents aged 25 or older with Bachelor's degrees for each of these 5 counties.
+
+```{r}
+# display indicated info on screen
+
+# Use slice_max to find the 5 highest percentages of residents aged 25 years or older 
+# with Bachelor's degrees and select only the NAME and pcnt_bs columns.
+slice_max(as_tibble(cali_sf), pcnt_bs, n = 5) |> select(NAME, pcnt_bs)
+```
+
+# Question 20
+
+------------------------------------------------------------------------
+
+Plot the borders of the California counties while filling the counties with the 5 largest percentages of residents aged 25 years or older with a Bachelor's degree one color and the remaining counties in a different color. **Include a descriptive main title for the plot**.
+
+```{r}
+# create the indicated visualization
+
+# Store the previous code block in bs_max (without the select()).
+bs_max <- slice_max(cali_sf, pcnt_bs, n = 5)
+
+# Use ggplot() to plot.
+ggplot() +
+  
+  # Use geom_sf() to create an empty map and fill with light pink.
+  geom_sf(data = cali_sf, fill = "lightpink") +
+  
+  # Use geom_sf() to overlay the bs_max and fill it with green.
+  geom_sf(data = bs_max, fill = "green") +
+  
+  # Add a title and a subtitle using labs().
+  labs(title = "5 California counties with highest % of residents aged- 
+25 years or older with a Bachelor's degree",
+       subtitle = "(areas that are highlighted in green)")
+```
+
+# Question 21
+
+------------------------------------------------------------------------
+
+Do you notice any spatial patterns for the counties with the 5 highest percentages of residents aged 25 years or older with Bachelor's degrees? Type your answer in the space below using a complete sentence.
+
+## Solution to Question 21
+
+------------------------------------------------------------------------
+
+The counties with 5 highest percentages of residents aged 25 years or older with Bachelor's degrees are all grouped up together in the left-middle of California. Interestingly, these counties are also the same 5 counties that have the most median income as well.
+
+# Question 22
+
+------------------------------------------------------------------------
+
+When you think of the song that best represents California, which song do you think of and why? Type your answer in the space below!
+
+## Solution to Question 22
+
+------------------------------------------------------------------------
+
+I'm not sure how related this song is to California, but I always think of the song called "Hotel California" by Eagles. It's most likely because when I was a kid, my mom would always play this song on her tiny phone to wake me up everyday for me to go to school. Perhaps that's why this song would always pop up in my head whenever I see the word "California". Even though I'm thinking about the song that best represents California, I could only think about that song, haha! (I have no clue if this song relates to California or not, it's just always in my mind, I'm sorry if I offended anyone haha!)
+
+# Be Sure to Do the Following Once Completed
+
+------------------------------------------------------------------------
+
+-   Be sure you have run ALL code cells before saving your work.
+-   Be sure all relevant code output is displayed in Quarto document.
+-   Then be sure to save the your work as a Quarto document.
+-   Finally, be sure you render your final work to a static `html` that you submit along with your Quarto file in Canvas.

@@ -1,0 +1,440 @@
+---
+title: "Homework 8"
+author: "Payut Surapinchai"
+format: 
+  html:
+    embed-resources: true    
+editor: visual
+warning: false
+---
+
+# Homework 8: Due Wednesday, April 2 at 11:59 PM
+
+------------------------------------------------------------------------
+
+## Instructions:
+
+------------------------------------------------------------------------
+
+1.  [Be sure to download and save the file so you are working with your own private copy of the file (rather than the shared version posted in Posit Cloud for example).]{style="color:red"}
+
+2.  [After you have copied the Quarto file into your Posit Cloud workspace or onto your computer, you can begin editing and saving your work.]{style="color:green"}
+
+**Submit your work electronically as two separate files:**
+
+-   **A Quarto markdown file with file extension `.qmd` with all code cells run and relevant output displayed in the document**.
+-   **After you have completed all questions, render your completed work to an html file.**
+-   **Submit the html file that is created with file extension `.html`**.
+
+Upload your file into the Homework 8 assignment in Canvas before [**11:59PM on Wednesday, April 2.**]{style="color:blue"}
+
+**You must provide supporting work for your all of your answers.**
+
+-   [That work will include using R code cells.]{style="color:blue"}
+    -   **Feel free to insert as much R code as you like.**
+    -   When asked, you must interpret or explain how the output of a code cell is being utilized to solve the question.
+    -   **Code with incomplete or missing explanations of why the output is useful may not receive full credit.**
+    -   **Code that involves methods and commands we have not discussed this semester may not receive full credit.**
+-   [Your work may also involve writing explanations and justifications in text cells.]{style="color:blue"}
+    -   **Be sure to type/write out the steps of your work/explanation so I can see how you arrived at your answer.**
+
+## Important Academic Policies:
+
+------------------------------------------------------------------------
+
+-   **Be your own work.** Though you may collaborate with others, everyone is responsible for writing up the work in their own way using their own methods. Plagiarism of any form is not tolerated.
+-   **Be complete.** You must provide all work and/or explanations needed to find the solution. Answers with insufficient or incomplete supporting work may lose credit.
+-   **Adhere to the Code of Academic Honesty.**
+-   **Be clearly written (and legible if written).** Your solution to a question must be clear, written in complete sentences. You may lose credit for work that is unclear or hard to follow.
+
+## [Let me know if you need help, and **GOOD LUCK!!!**]{style="color:blue"}
+
+------------------------------------------------------------------------
+
+# Introduction to Assignment
+
+------------------------------------------------------------------------
+
+In this assignment you will create various interactive graphics based on the `starwars` and `franconia` data sets.
+
+[**Note 1: You must render the completed file to `html`. You will turn in both the `.qmd` and `.html` files through Canvas.** Do not render to pdf or any other file type besides `html`.]{style="color:blue"}
+
+Note 2: Interactive graphics don't always play very nicely with R Studio. You may encounter the following error: `dirname(to) : path too long` when attempting to run a code chunk. You may not have done anything wrong.
+
+-   The easiest work around is to simply render the file to an `html_document` instead of trying to run a code chunk.
+-   Alternatively, you can try running your commands from a standard `.R` file instead of a `.qmd` file.
+-   Lastly, you can `"Restart R"` and attempt to rerun your code chunks, which sometimes works.
+
+## The `starwars` Data Set
+
+------------------------------------------------------------------------
+
+We will practice creating interactive graphics using the `starwars` data set from the `dplyr` package. As stated in its documentation (`?dplyr::starwars`) the original data were obtained from the Star Wars API <https://swapi.dev/> and were updated based on additional research into gender and sex determinations of the characters.
+
+```{r}
+#| include: FALSE
+data(starwars, package = "dplyr")
+```
+
+The `starwars` data set is a data frame (technically, a tibble data frame) with `r nrow(starwars)` rows and `r ncol(starwars)` variables:
+
+-   `name`: the character's name.
+-   `height`: the character's height (cm).
+-   `mass`: the character's mass (kg).
+-   `hair_color`: the character's hair color.
+-   `skin_color`: the character's skin color.
+-   `eye_color`: the character's eye color.
+-   `birth_year`: the character's birth year (BBY = Before Battle of Yavin).
+-   `sex`: the character's biological sex (male, female, hermaphroditic, or none (as in the case for Droids)).
+-   `gender`: the character's gender role or gender identity as determined by their personality or the way they were programmed (as in the case for Droids).
+-   `homeworld`: the name of the character's homeworld.
+-   `species`: the character's species.
+-   `films`: the films the character appeared in.
+-   `vehicles`: the vehicles the character has piloted.
+-   `starships`: the starships the character has piloted.
+
+## Loading Required Packages and Data
+
+------------------------------------------------------------------------
+
+Start by loading the `ggplot2` and `plotly` packages and `starwars` data set into memory.
+
+```{r}
+library(ggplot2, quietly = TRUE)
+library(plotly, quietly = TRUE)
+data(starwars, package = "dplyr")
+```
+
+# Question 1
+
+------------------------------------------------------------------------
+
+Create an interactive bar plot of the `sex` variable. Use your interactive graphic to determine the number of males, females, hermaphroditic, none, and `NA` values.
+
+Type your answer in the solution space below the output of your code.
+
+```{r}
+# enter code to create the plot
+
+# Create a basic bar plot using ggplot() and store it in ggbar
+ggbar <- ggplot(starwars, aes(x = sex)) +
+  geom_bar()
+
+# Use ggplotly on ggbar (where it stores a bar plot) to convert the bar plot to 
+# an interactive bar plot
+ggplotly(ggbar)
+```
+
+## Solution to Question 1
+
+------------------------------------------------------------------------
+
+What are the number of males, females, hermaphroditic, none, and `NA` values in the data?
+
+Number of males : 60
+
+Number of females : 16
+
+Number of hermaphroditic : 1
+
+Number of none : 6
+
+Number of NA : 4
+
+# Question 2
+
+------------------------------------------------------------------------
+
+Use the `plotly` package directly to create an interactive box plot of the `mass` variable for the `starwars` data frame. No credit will be given if you do this using `ggplot2` and the `ggplotly()` function. Set the name argument to `""`. Then type an answer to the question in the solution space below the code.
+
+```{r}
+# enter code to create the plot
+
+# Use plot_ly to create an interactive box plot
+plot_ly(starwars,
+        x = ~mass,
+        type = "box",
+        name = "")
+```
+
+## Solution to Question 2
+
+------------------------------------------------------------------------
+
+What is the value of the the largest outlier?
+
+The value of the largest outlier is 1358 (in kg).
+
+# Question 3
+
+------------------------------------------------------------------------
+
+Create a new data set named `starwars_small` by:
+
+1.  Selecting the `height` and `gender` variables of the `starwars` data frame.
+2.  Omitting any rows that having missing values.
+
+Make sure to do 1 before 2.
+
+After completing these steps, use the `summary()` function on `starwars_small` to display summary output to the screen.
+
+```{r}
+# enter code to perform the indicated operation(s)
+
+# Select starwars data frame's height and gender column using piping, and store it in
+# starwars_small
+starwars_small <- starwars |> select(height,gender)
+
+# Use na.omit() to remove the NA values in each columns
+starwars_small <- na.omit(starwars_small)
+
+# Use summary() to print out the summary of the new subset (starwars_small)
+summary(starwars_small)
+```
+
+# Question 4
+
+------------------------------------------------------------------------
+
+Using the `starwars_small` data set, create an interactive density plot of `height` that colors the density based on `gender`.
+
+Make sure your fill color is semi-transparent.
+
+Then answer the question in the solution space below the output of your code.
+
+```{r}
+# enter code to generate plot
+
+# Create a density plot using ggplot(), use fill = gender to get different color for-
+# each gender, and store it in gg_dens
+gg_dens <-ggplot(starwars_small, aes(x = height, fill = gender)) +
+            geom_density(alpha = 0.3)  # alpha = 0.3 makes the fill transparent
+
+# Use ggplotly to convert gg_dens (a basic density plot) to an interactive density plot
+ggplotly(gg_dens)
+```
+
+## Solution to Question 4
+
+------------------------------------------------------------------------
+
+What appears to be the `height` with the maximum density for those observations with feminine `gender`?
+
+The height that has the maximum density appears to be 166.74364 (in cm).
+
+# Question 5
+
+------------------------------------------------------------------------
+
+Using the `starwars_small` data set, use `ggplot2` and the `ggplotly()` function to create an interactive histogram of the `height` variable that fills the histogram color based on `gender`. Manually specify the bin positions of the histogram by specifying the following argument in `geom_histogram`: `breaks = seq(30, 270, by = 10)`
+
+```{r}
+# enter code to generate plot
+
+# Create a histogram using ggplot() where fill = gender to fill histogram based on color
+# and store it in gg_hist
+gg_hist <- ggplot(starwars_small, aes(x = height, fill = gender)) +
+            geom_histogram(breaks = seq(30, 270, by = 10))  # breaks arg from question
+
+# Use ggplotly to convert the histogram into an interactive histogram
+ggplotly(gg_hist)
+```
+
+# Question 6
+
+------------------------------------------------------------------------
+
+Using the `starwars_small` data set, use the `plotly` package directly to create an interactive histogram of the `height` variable that splits the histograms by `gender`. Make sure to use `alpha = 0.3` and specify 30 bins. Use the pipe operator (either native R or tidyverse-style) and add the following command to your plot: `layout(barmode = "stack")`. This plot should look similar to the previous plot except that `masculine` bars are stacked on top of `feminine` bars, while `ggplot2` stacks in the reverse order.
+
+Then answer the question in the solution space below the output of your code.
+
+```{r}
+# enter code to generate plot
+
+# Use plot_ly to create a similar interactive histogram plot
+plot_ly(starwars_small,
+        x = ~height,
+        split = ~gender,  # Splits by gender
+        alpha = 0.3,  # Transparency of the plkot
+        nbinsx = 30,
+        type = "histogram") |>
+        layout(barmode = "stack")  # So the plot stacks just like question 5's plot
+```
+
+## Solution to Question 6
+
+------------------------------------------------------------------------
+
+How many `masculine` and `feminine` observations have heights between 160 and 169 cm?
+
+Number of masculine with height between 160 - 169 cm : 3
+
+Number of feminine with height between 160 - 169 cm : 6
+
+# Question 7
+
+------------------------------------------------------------------------
+
+Use the `plotly` package directly to create an interactive scatter plot of `mass` (y-variable) versus `height` (x-variable) for the `starwars` data.
+
+Then answer the question in the solution space below the output of your code.
+
+```{r}
+# enter code to generate plot
+
+# Use plot_ly to create an interactive scatter plot
+plot_ly(starwars, 
+       x = ~height,
+       y = ~mass,
+       mode = "markers",  # Use mode = "markers", if its other mode it won't be a-
+                          # scatter plot
+       type = "scatter")  # Tell that you want a scatter plot
+```
+
+## Solution to Question 7
+
+------------------------------------------------------------------------
+
+There is a single clear outlier in the data set. What is the `height` and `weight` of the outlier?
+
+The height of the outlier is 175 cm, and the weight of the outlier is 1358 kg.
+
+# Question 8
+
+------------------------------------------------------------------------
+
+Create an interactive scatter plot of `mass` (y-variable) versus `height` (x-variable) for the `starwars` data that displays the character `name` associated with each observation when you hover a point.
+
+Then answer the question in the solution space below the output of your code.
+
+```{r}
+# enter code to generate plot
+
+# I made two versions of the code to compare them to each other.
+# I like this one more since the name is very clear and its doesn't have "..." at the 
+# end of the name like the plot_ly one does.
+
+# Use ggplot() to create a basic scatter plot with label = name
+gghover <- ggplot(starwars, aes(x = height, y = mass, label = name)) +
+            geom_point()
+
+# Create an interactive scatter plot using ggplotly(), and tooltip = "label" to show
+# the info when hovering over a data point
+ggplotly(gghover, tooltip = "label")
+```
+
+```{r}
+# enter code to generate plot
+
+# Create a similar scatter plot to the one above, where the hoverinfo = "split"
+# which shows the info of split when you're hovering above the data point
+# (I just wanted to see the difference between the two)
+plot_ly(starwars, 
+       x = ~height,
+       y = ~mass,
+       split = ~name,  # Split according to name
+       mode = "markers",
+       type = "scatter",
+       hoverinfo = "split")  # Show the hovering info from split argument
+```
+
+## Solution to Question 8
+
+------------------------------------------------------------------------
+
+There is a single clear outlier in the data set. What is the name of the character who is an outlier in this data set?
+
+The name of the single clear outlier is Jabba Desilijic Tiure.
+
+# Question 9
+
+------------------------------------------------------------------------
+
+Use `plotly` to directly create a violin plot of the `height` variable for the `starwars` data set.
+
+Then answer the question in the solution space below the output of your code.
+
+```{r}
+# enter code to generate plot
+
+# Use plot_ly() to create a basic violin plot
+plot_ly(starwars,
+        x = ~height,
+        type = "violin")
+```
+
+## Solution to Question 9
+
+------------------------------------------------------------------------
+
+What is the $0.75$ quantile of `height`?
+
+The 0.75 quantile of height is 191 cm.
+
+# The `franconia` Data Set
+
+------------------------------------------------------------------------
+
+According to Wikipedia (<https://en.wikipedia.org/wiki/Franconia>):
+
+> Franconia is a region of Germany, characterised by its culture and Franconian dialect.
+
+The `mapview` package contains an `sf` data frame of Franconia. Install the `mapview` package and load the `franconia` data set. Relevant variables include:
+
+-   `SHAPE_AREA`: the area of each region.
+-   `NAME_ASCI`: the name of the region, and if followed by a comma, a designation (Kreisfreie Stadt = independent city, Landkreis = district)
+-   `geometry`: the `MULTIPOLYGON` describing each region.
+-   `district`: the district name of each region.
+
+Run `install.packages("mapview")` in the Console to install the `mapview` package.
+
+-   **Do not include an executable command `install.packages()` in the work you submit.**
+-   You do not want somebody to inadvertently install files when rendering your work to `html`!
+
+```{r}
+# install.packages("mapview")
+data(franconia, package = "mapview")
+```
+
+# Question 10
+
+------------------------------------------------------------------------
+
+Use `plotly` to directly create an interactive map of the `franconia` data set that colors the regions according to `SHAPE_AREA` and provides the `NAME_ASCI` of each region when you hover over the region. Use the title "area" for the color bar.
+
+Then answer the question in the solution space below the output of your code.
+
+```{r}
+# enter code to generate plot
+
+# Create an interactive map using plot_ly() 
+plot_ly(franconia, 
+        color = ~SHAPE_AREA,
+        split = ~NAME_ASCI,  # Splits the data within their category
+        showlegend = FALSE,  # We don't need to show the legend, so only color scale is 
+                             # displayed, and not legends to franconia data set
+        alpha = 1,
+        hoverinfo = "text",  # So the info when you're hovering the mouse is split
+        type = "scatter",  # Type is scatter
+        mode = "lines") |>  # Mode is lines because we want a map
+        colorbar(title = "area")  # Changes the title on the colorbar on the left
+```
+
+## Solution to Question 10
+
+------------------------------------------------------------------------
+
+What is the name of the largest region?
+
+The name of the largest region is Ansbach, Landkreis.
+
+------------------------------------------------------------------------
+
+# Be Sure to Do the Following Once Completed
+
+------------------------------------------------------------------------
+
+-   Be sure you have run ALL code cells before saving your work.
+-   Be sure all relevant code output is displayed in Quarto document.
+-   Then be sure to save the your work as a Quarto document.
+-   Finally, be sure you render your final work to a static `html` that you submit along with your Quarto file in Canvas.
