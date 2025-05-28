@@ -1,4 +1,4 @@
-# Data-Wrangling and Visualizations
+# Data Wrangling and Visualizations
 Instructor: Adam Spiegler
 
 This repository consists of all my courseworks and projects from Data wrangling and Visualizations course in University of Colorado Denver. Through the Data wrangling and Visualizations course, I've learned how to do some advanced data wrangling, advanced data visualizations, statistical calculations, and in-depth exploratory data analysis in R. The materials here demonstrates my ability to work with real-world datasets, applying the techniques from the course, and communicating the insights effectively.
